@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:open_file/open_file.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
@@ -126,10 +128,17 @@ class _ResumeScreenState extends State<ResumeScreen> {
       );
 
       final directory = await getApplicationDocumentsDirectory();
-      final file = File('${directory.path}/resume.pdf');
+      final filePath = '${directory.path}/resume.pdf';
+      final file = File(filePath);
 
       // Ensure that the file is being written properly
       await file.writeAsBytes(await pdf.save());
+
+      if (await file.exists()) {
+        await OpenFile.open(filePath);
+      } else {
+        log('Failed to create file at $file');
+      }
 
       setState(() {
         _pdfPath = file.path;
