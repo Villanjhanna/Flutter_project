@@ -134,7 +134,7 @@ class _ResumeScreenState extends State<ResumeScreen> {
       // Ensure that the file is being written properly
       await file.writeAsBytes(await pdf.save());
 
-      if (await file.exists()) {
+      if (file.existsSync()) {
         await OpenFile.open(filePath);
       } else {
         log('Failed to create file at $file');
@@ -145,11 +145,11 @@ class _ResumeScreenState extends State<ResumeScreen> {
         _isPdfGenerated = true;
       });
 
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('resume_path', _pdfPath!);
-      print('PDF generated at: ${file.path}');
-      print('Is PDF generated: $_isPdfGenerated');
-      print('PDF Path: $_pdfPath');
+      // SharedPreferences prefs = await SharedPreferences.getInstance();
+      // await prefs.setString('resume_path', _pdfPath!);
+      // print('PDF generated at: ${file.path}');
+      // print('Is PDF generated: $_isPdfGenerated');
+      // print('PDF Path: $_pdfPath');
     } catch (e) {
       print("Error generating PDF: $e");
       ScaffoldMessenger.of(context)
@@ -213,23 +213,23 @@ class _ResumeScreenState extends State<ResumeScreen> {
           'https://s2010681.helioho.st/store_user_details.php';
 
       try {
-        final response = await http.post(
-          Uri.parse(apiUrl),
-          body: {
-            'name': _nameController.text,
-            'email': _emailController.text,
-            'phone': _phoneController.text,
-            'address': _addressController.text,
-            'summary': _summaryController.text,
-            'experience': _experienceController.text,
-            'education': _educationController.text,
-            'skills': _skillsController.text,
-          },
-        );
+        final response = await http.post(Uri.parse(apiUrl),
+            body: jsonEncode(
+              {
+                'name': _nameController.text.trim(),
+                'email': _emailController.text.trim(),
+                'phone': _phoneController.text.trim(),
+                'address': _addressController.text.trim(),
+                'summary': _summaryController.text.trim(),
+                'experience': _experienceController.text.trim(),
+                'education': _educationController.text.trim(),
+                'skills': _skillsController.text.trim(),
+              },
+            ));
 
-        final responseData = json.decode(response.body);
+        final responseData = jsonDecode(response.body);
 
-        if (response.statusCode == 200 && responseData['success'] != null) {
+        if (response.statusCode == 200) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Resume saved successfully!')),
           );
